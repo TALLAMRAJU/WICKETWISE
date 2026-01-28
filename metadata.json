@@ -1,0 +1,7 @@
+{
+  "name": "WicketWise AI",
+  "description": "Professional-grade cricket predictive analytics and trading engine. Utilizing deep stochastic modeling via Gemini AI to identify market entropy and structural edges.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
