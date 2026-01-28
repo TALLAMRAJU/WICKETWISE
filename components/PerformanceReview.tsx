@@ -69,7 +69,7 @@ const PerformanceReview: React.FC<PerformanceReviewProps> = ({ trades, onAuditTr
         <div className="bg-black/90 border border-white/20 p-4 rounded-2xl shadow-2xl backdrop-blur-xl">
           <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">{payload[0].payload.name}</p>
           <p className="text-xl font-[900] text-white mono">
-            ${payload[0].value.toLocaleString()}
+            ₹{payload[0].value.toLocaleString('en-IN')}
           </p>
         </div>
       );
@@ -87,15 +87,15 @@ const PerformanceReview: React.FC<PerformanceReviewProps> = ({ trades, onAuditTr
       <div className="grid grid-cols-3 gap-3 mx-2">
          <div className="bg-[#111114] p-5 rounded-[28px] border border-white/5 shadow-xl group hover:border-indigo-500/20 transition-all">
             <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest block mb-2">Total Staked</span>
-            <span className="text-sm font-[900] text-white mono">${totalStaked.toLocaleString()}</span>
+            <span className="text-sm font-[900] text-white mono">₹{totalStaked.toLocaleString('en-IN')}</span>
          </div>
          <div className="bg-[#111114] p-5 rounded-[28px] border border-white/5 shadow-xl group hover:border-indigo-500/20 transition-all">
             <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest block mb-2">Mean Exposure</span>
-            <span className="text-sm font-[900] text-indigo-400 mono">${averageStake.toFixed(0)}</span>
+            <span className="text-sm font-[900] text-indigo-400 mono">₹{averageStake.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
          </div>
          <div className="bg-[#111114] p-5 rounded-[28px] border border-white/5 shadow-xl group hover:border-indigo-500/20 transition-all">
             <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest block mb-2">Peak Exposure</span>
-            <span className="text-sm font-[900] text-amber-500 mono">${maxStake.toLocaleString()}</span>
+            <span className="text-sm font-[900] text-amber-500 mono">₹{maxStake.toLocaleString('en-IN')}</span>
          </div>
       </div>
       
@@ -123,7 +123,7 @@ const PerformanceReview: React.FC<PerformanceReviewProps> = ({ trades, onAuditTr
                 <Target className="w-4 h-4" /> Net P/L
               </span>
               <span className={`text-2xl font-[900] mono ${totalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                {totalProfit >= 0 ? '+' : '-'}${Math.abs(totalProfit).toLocaleString()}
+                {totalProfit >= 0 ? '+ ₹' : '- ₹'}{Math.abs(totalProfit).toLocaleString('en-IN')}
               </span>
            </div>
            <div className="p-7 flex flex-col">
@@ -215,7 +215,7 @@ const PerformanceReview: React.FC<PerformanceReviewProps> = ({ trades, onAuditTr
                   <div className="flex flex-col">
                     <span className="text-[8px] font-black text-gray-700 uppercase tracking-widest mb-1">Outcome</span>
                     <span className={`text-[11px] font-black font-mono leading-none ${trade.status === 'WON' ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {trade.status === 'WON' ? `+$${(trade.stake * (trade.odds - 1)).toFixed(0)}` : `-$${trade.stake.toFixed(0)}`}
+                      {trade.status === 'WON' ? `+₹${(trade.stake * (trade.odds - 1)).toFixed(0)}` : `-₹${trade.stake.toFixed(0)}`}
                     </span>
                   </div>
                   <div className="flex flex-col items-center">

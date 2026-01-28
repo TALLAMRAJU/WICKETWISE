@@ -1,57 +1,38 @@
 
 import { CricketMatch, MatchStatus, UserRule, MarketType, MarketClassification } from './types';
 
-/**
- * Intelligent Market Classifier
- * 
- * APEX_STRAT: Core liquidity markets (Match Odds)
- * TACTICAL_PLAY: High-volume structural markets (Innings Runs)
- * VOID_TRAP: Extreme longshots, illiquid lines, or high-variance traps
- */
 export const determineMarketClassification = (type: MarketType, odds: number): MarketClassification => {
   if (type === 'MATCH_WINNER') return 'APEX_STRAT';
-  
-  // Discipline Rule: Avoid extreme variance or low-probability "lotto" lines
-  if (odds > 12.0 || odds < 1.02) return 'VOID_TRAP';
-  
-  // Innings and Session markets are strategic secondary layers
-  if (type === 'INN_RUNS' || type === 'SESSION_RUNS' || type === 'PP_RUNS') return 'TACTICAL_PLAY';
-  
-  return 'VOID_TRAP';
+  if (odds > 15.0 || odds < 1.01) return 'VOID_TRAP';
+  return 'TACTICAL_PLAY';
 };
 
 export const INITIAL_RULES: UserRule[] = [
   {
-    id: 'mean-reversal-extreme',
-    name: 'Mean Reversal Extremes',
-    description: 'Detects aggressive market line stretching (e.g. ODI scores >380 or T20 >230) where statistical mean reversal probability is high despite match context.',
-    isActive: true,
-    minOdds: 1.05,
-    maxOdds: 10.0
-  },
-  {
-    id: 'lay-the-favorite-pp',
-    name: 'Betfair Lay-the-Favorite',
-    description: 'Lay the favorite if they are chasing and the RRR climbs > 10.5 in middle overs.',
+    id: 'variance-drift-25',
+    name: 'Variance Drift (>25%)',
+    description: 'Detects markets where current price deviates by >25% from starting odds without a justified change in innings score/wickets.',
     isActive: true,
     minOdds: 1.1,
-    maxOdds: 1.6
+    maxOdds: 8.0,
+    triggerLogic: 'ABS(Current - Initial) / Initial > 0.25'
   },
   {
-    id: 'volume-spike-wickets',
-    name: 'Liquidity Momentum Check',
-    description: 'Back the bowling side if a massive volume spike occurs before a ball is bowled.',
+    id: 'over-threshold-runs',
+    name: 'Over-Line Compression',
+    description: 'Identifies value in 10, 15, and 20 over run lines when RRR vs CRR variance reaches a structural peak.',
     isActive: true,
     minOdds: 1.8,
-    maxOdds: 3.5
+    maxOdds: 2.5,
+    triggerLogic: 'Line Drift > 15 Runs'
   },
   {
-    id: 'variance-drift-back',
-    name: 'Discipline: Variance Play',
-    description: 'Alert if current odds drift > 20% from SP despite no major wicket loss.',
+    id: 'lay-favorite-regression',
+    name: 'Mean Reversal Favorite',
+    description: 'Lay favorites when they are being over-backed by market sentiment (>15% price compression) in middle overs.',
     isActive: true,
-    minOdds: 1.5,
-    maxOdds: 5.0
+    minOdds: 1.05,
+    maxOdds: 1.5
   }
 ];
 
@@ -64,89 +45,39 @@ export const MOCK_MATCHES: CricketMatch[] = [
     scoreB: 'Yet to bat',
     status: MatchStatus.LIVE,
     format: 'T20',
-    venue: 'Mumbai',
+    venue: 'Mumbai, Wankhede',
     overs: '16.2',
     startingOddsA: 1.45, 
     startingOddsB: 2.80,
-    advisesUsed: 0,
     marketLines: [
       {
         id: 'ml1_1',
         type: 'MATCH_WINNER',
         label: 'Match Winner',
-        classification: determineMarketClassification('MATCH_WINNER', 1.65),
+        classification: 'APEX_STRAT',
         backOdds: 1.65,
         layOdds: 1.67,
+        initialOdds: 1.45,
         totalMatched: 450000,
         backLiquidity: 12000,
         layLiquidity: 8500,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
+        source: 'MOCK'
       },
       {
-        id: 'ml1_2',
-        type: 'INN_RUNS',
-        label: 'Total Runs (Innings 1)',
-        classification: determineMarketClassification('INN_RUNS', 1.95),
-        lineValue: 245,
-        backOdds: 1.95,
+        id: 'ml1_10',
+        type: 'OVER_RUNS_10',
+        label: 'Runs at Over 10',
+        classification: 'TACTICAL_PLAY',
+        backOdds: 1.90,
         layOdds: 2.05,
-        totalMatched: 120000,
-        backLiquidity: 5000,
-        layLiquidity: 4500,
-        lastUpdated: new Date().toISOString()
-      },
-      {
-        id: 'ml1_3',
-        type: 'WICKET_NEXT',
-        label: 'Next Wicket Over 17.5',
-        classification: determineMarketClassification('WICKET_NEXT', 15.5), // High odds -> VOID_TRAP
-        backOdds: 15.5,
-        layOdds: 16.5,
-        totalMatched: 1500,
-        backLiquidity: 200,
-        layLiquidity: 150,
-        lastUpdated: new Date().toISOString()
-      }
-    ]
-  },
-  {
-    id: 'm2',
-    teamA: 'England',
-    teamB: 'South Africa',
-    scoreA: '280/8',
-    scoreB: '150/2',
-    status: MatchStatus.LIVE,
-    format: 'ODI',
-    venue: 'London',
-    overs: '25.0',
-    startingOddsA: 1.90, 
-    startingOddsB: 1.90,
-    advisesUsed: 0,
-    marketLines: [
-      {
-        id: 'ml2_1',
-        type: 'MATCH_WINNER',
-        label: 'Match Winner',
-        classification: determineMarketClassification('MATCH_WINNER', 3.10),
-        backOdds: 3.10,
-        layOdds: 3.15,
-        totalMatched: 890000,
-        backLiquidity: 25000,
-        layLiquidity: 30000,
-        lastUpdated: new Date().toISOString()
-      },
-      {
-        id: 'ml2_2',
-        type: 'INN_RUNS',
-        label: 'Total Runs (Innings 1)',
-        classification: determineMarketClassification('INN_RUNS', 1.80),
-        lineValue: 410,
-        backOdds: 1.80,
-        layOdds: 1.85,
-        totalMatched: 340000,
-        backLiquidity: 15000,
-        layLiquidity: 12000,
-        lastUpdated: new Date().toISOString()
+        initialOdds: 1.85,
+        lineValue: 85,
+        totalMatched: 150000,
+        backLiquidity: 2000,
+        layLiquidity: 2000,
+        lastUpdated: new Date().toISOString(),
+        source: 'MOCK'
       }
     ]
   }

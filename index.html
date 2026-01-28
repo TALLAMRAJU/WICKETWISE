@@ -6,11 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WicketWise">
     <meta name="theme-color" content="#050505">
+    
+    <!-- PWA Linkage -->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="https://lucide.dev/api/icon/target?size=180&stroke=%236366f1">
+    
     <title>WicketWise AI - Stochastic Trading Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --sat: env(safe-area-inset-top);
+            --sar: env(safe-area-inset-right);
+            --sab: env(safe-area-inset-bottom);
+            --sal: env(safe-area-inset-left);
+        }
         body { 
           font-family: 'Inter', sans-serif; 
           background-color: #050505;
@@ -19,9 +31,17 @@
           overflow-x: hidden;
           -webkit-font-smoothing: antialiased;
           overscroll-behavior-y: contain;
+          color: #e0e0e0;
         }
         .mono { font-family: 'JetBrains Mono', monospace; }
         .glass { background: rgba(17, 17, 20, 0.85); backdrop-filter: blur(24px); }
+        
+        /* Notch & Home Indicator Padding */
+        #root {
+            padding-top: var(--sat);
+            padding-bottom: var(--sab);
+        }
+
         .scanline {
           position: fixed;
           top: 0; left: 0;
@@ -31,13 +51,23 @@
           background-size: 100% 4px;
           pointer-events: none;
           z-index: 9999;
-          opacity: 0.1;
+          opacity: 0.05;
         }
+        
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+
         @keyframes bounce-in {
           0% { transform: scale(0.9) translateY(20px); opacity: 0; }
           100% { transform: scale(1) translateY(0); opacity: 1; }
         }
         .animate-bounce-in { animation: bounce-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        
+        /* Hide scrollbars for a clean mobile UI */
+        ::-webkit-scrollbar { display: none; }
     </style>
 <script type="importmap">
 {

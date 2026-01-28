@@ -5,42 +5,57 @@ export enum MatchStatus {
   COMPLETED = 'COMPLETED'
 }
 
-export type MembershipTier = 'BASIC' | 'PRO';
+export type BridgeStatus = 'OFFLINE' | 'VPN_VERIFYING' | 'AUTH_PENDING' | 'SYNCED' | 'RECON_ACTIVE' | 'ERROR';
+
 export type MarketClassification = 'APEX_STRAT' | 'TACTICAL_PLAY' | 'VOID_TRAP';
-export type MarketType = 'MATCH_WINNER' | 'INN_RUNS' | 'PP_RUNS' | 'WICKET_NEXT' | 'SESSION_RUNS';
+export type MarketType = 
+  | 'MATCH_WINNER' 
+  | 'INN_RUNS' 
+  | 'PP_RUNS' 
+  | 'WICKET_NEXT' 
+  | 'SESSION_RUNS'
+  | 'OVER_RUNS_4' 
+  | 'OVER_RUNS_6' 
+  | 'OVER_RUNS_10' 
+  | 'OVER_RUNS_15' 
+  | 'OVER_RUNS_20' 
+  | 'OVER_RUNS_25' 
+  | 'OVER_RUNS_30' 
+  | 'OVER_RUNS_40' 
+  | 'OVER_RUNS_50';
 
-export interface BetfairConfig {
-  appKey: string;
-  sessionToken: string;
-  isConnected: boolean;
-}
-
-export interface PreMatchResearch {
-  venueAlert: string;
-  weatherImpact: string;
-  keyMatchup: string;
-  formTrend: string;
-  strategyLead: 'COMPRESSION' | 'INFLATION' | 'MEAN_REVERSION' | 'MOMENTUM';
-  battlePlanSummary: string;
+export interface ChatMessage {
+  id: string;
+  sender: 'USER' | 'AI';
+  text: string;
+  timestamp: string;
+  type: 'TEXT' | 'SIGNAL' | 'STATUS';
+  payload?: any;
 }
 
 export interface StructuralContext {
   venueBehavior: string;
-  volatilityIndex: number; // 1-10
+  volatilityIndex: number;
   pressureClassification: string;
   squadBalanceObservation: string;
 }
 
-export interface ExecutionConfig {
-  autoTradingEnabled: boolean;
-  maxExposurePerTrade: number;
-  minConsensusLevel: number;
-  strategyOnlyView: boolean;
-  excludeAvoidMarkets: boolean;
-  excludeVariancePlays: boolean;
-  unitValue: number;
-  dataSource: 'MOCK' | 'BETFAIR';
-  allowedFormats: ('T20' | 'ODI' | 'TEST')[];
+export interface UserRule {
+  id: string;
+  name: string;
+  description: string;
+  isActive: boolean;
+  minOdds: number;
+  maxOdds: number;
+  triggerLogic?: string;
+}
+
+export interface JeebetConfig {
+  username: string;
+  password?: string;
+  sessionCookie: string;
+  isConnected: boolean;
+  bridgeStatus: BridgeStatus;
 }
 
 export interface MarketLine {
@@ -54,8 +69,9 @@ export interface MarketLine {
   totalMatched: number;
   backLiquidity: number;
   layLiquidity: number;
-  baselineValue?: number;
   lastUpdated: string;
+  source: 'BETFAIR' | 'JEEBET' | 'MOCK' | 'LIVE_EXCHANGE';
+  initialOdds?: number; // Starting odds for variance tracking
 }
 
 export interface CricketMatch {
@@ -68,13 +84,11 @@ export interface CricketMatch {
   format: 'T20' | 'ODI' | 'TEST';
   venue: string;
   overs: string;
-  startingOddsA: number;
-  startingOddsB: number;
   marketLines: MarketLine[];
-  context?: StructuralContext;
-  research?: PreMatchResearch;
-  advisesUsed: number;
-  isLiveBetfair?: boolean;
+  isLiveRealtime?: boolean;
+  startingOddsA?: number;
+  startingOddsB?: number;
+  advisesUsed?: number;
 }
 
 export interface AIEdge {
@@ -85,10 +99,7 @@ export interface AIEdge {
   observation: string;
   structuralReasoning: string[];
   isLocked: boolean;
-  isHeavy?: boolean;
-  recommendation?: string;
-  reasoning?: string;
-  timestamp?: string;
+  triggeredRules?: string[];
 }
 
 export interface TradeLog {
@@ -98,19 +109,9 @@ export interface TradeLog {
   marketLabel: string;
   side: 'BACK' | 'LAY';
   odds: number;
-  units: 0.5 | 1.0 | 1.5;
   stake: number;
-  ruleId: string;
-  status: 'OPEN' | 'WON' | 'LOST' | 'MATCHED' | 'EXECUTING' | 'FAILED';
+  status: 'WON' | 'LOST' | 'MATCHED';
   timestamp: string;
+  sourceNode: string;
   explanation?: string;
-}
-
-export interface UserRule {
-  id: string;
-  name: string;
-  description: string;
-  isActive: boolean;
-  minOdds?: number;
-  maxOdds?: number;
 }
